@@ -1,6 +1,3 @@
-// TODO TEMP CACHING TEST
-test_caching_port_c1 = function() {};
-
 // Chrome to Safari port
 // Author: Michael Gundlach (gundlach@gmail.com)
 //         "tabs", "browserAction", and additional "extension" API support by
