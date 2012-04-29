@@ -312,6 +312,14 @@ if (SAFARI) {
     },
 
     browserAction: {
+      setBadgeBackgroundColor: function() {
+        // No-op.
+      },
+
+      setBadgeText: function() {
+        // No-op.
+      },
+
       // Compatible with one toolbar button.
       setIcon: function(details) {
         safari.extension.toolbarItems[0].image =
