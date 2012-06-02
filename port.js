@@ -1,7 +1,7 @@
 // Chrome to Safari port
 // Author: Michael Gundlach (gundlach@gmail.com)
-//         "tabs", "browserAction", and additional "extension" API support by
-//         Brian Kennish <byoogle@gmail.com>
+//         "cookies", "tabs", "browserAction", and additional "extension" API
+//         support by Brian Kennish <byoogle@gmail.com>
 // License: GPLv3 as part of adblockforchrome.googlecode.com
 //          or MIT if GPLv3 conflicts with your code's license.
 //
@@ -259,6 +259,30 @@ if (SAFARI) {
       }
     },
 
+    cookies: {
+      getAll: function() {
+        // No-op.
+      },
+
+      getAllCookieStores: function() {
+        // No-op.
+      },
+
+      onChanged: {
+        addListener: function() {
+          // No-op.
+        }
+      },
+
+      remove: function() {
+        // No-op.
+      },
+
+      set: function() {
+        // No-op.
+      }
+    },
+
     tabs: {
       onUpdated: {
         addListener: function(listener) {
@@ -308,10 +332,25 @@ if (SAFARI) {
             });
           }, true);
         }
+      },
+
+      query: function(queryInfo, callback) {
+        if (queryInfo.active) {
+          callback(safari.application.activeBrowserWindow.activeTab);
+        } else {
+          // No-op.
+        }
       }
     },
 
+    // Compatible with one toolbar button.
     browserAction: {
+      onClicked: {
+        addListener: function(listener) {
+          safari.application.addEventListener('popover', listener, true);
+        }
+      },
+
       setBadgeBackgroundColor: function() {
         // No-op.
       },
@@ -320,10 +359,20 @@ if (SAFARI) {
         // No-op.
       },
 
-      // Compatible with one toolbar button.
       setIcon: function(details) {
         safari.extension.toolbarItems[0].image =
             chrome.extension.getURL(details.path);
+      },
+
+      setPopup: function(details) {
+        safari.extension.toolbarItems[0].popover =
+            safari.extension.createPopover(
+              'popup',
+              chrome.extension.getURL(details.popup),
+              details.width || 400,
+              details.height || 300
+            );
+        safari.extension.toolbarItems[0].command = null;
       }
     },
 
