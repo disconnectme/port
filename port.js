@@ -28,6 +28,7 @@ LEGACY_SAFARI = SAFARI && (navigator.appVersion.match(/\sSafari\/(\d+)\./) || [n
 if (SAFARI) {
 
   var isOnGlobalPage = !!safari.extension.bars;
+  var popup;
 
   // Return the object on which you can add/remove event listeners.
   // If there isn't one, don't explode.
@@ -319,34 +320,14 @@ if (SAFARI) {
               });
             }, true
           );
-
-          safari.application.addEventListener('navigate', function(event) {
-            listener(event.target.id, {
-              status: 'complete',
-              url: event.target.url,
-              pinned: null
-            }, {
-              id: event.target.id,
-              index: null, // TODO: Traverse the "event.target.tabs" array.
-              windowId: null,
-              openerTabId: null,
-              highlighted: null,
-              active:
-                  event.target.id == event.target.browserWindow.activeTab.id,
-              pinned: null,
-              url: event.target.url,
-              title: event.target.title,
-              favIconUrl: null,
-              status: 'complete',
-              incognito: null
-            });
-          }, true);
         }
       },
 
       query: function(queryInfo, callback) {
         if (queryInfo.active) {
-          callback(safari.application.activeBrowserWindow.activeTab);
+          var tab = safari.application.activeBrowserWindow.activeTab;
+          tab.id = getTabId(tab);
+          callback([tab]);
         } else {
           // No-op.
         }
@@ -372,7 +353,18 @@ if (SAFARI) {
       },
 
       setBadgeText: function(details) {
-        safari.extension.toolbarItems[0].badge = details.text;
+        var tabId = details.tabId;
+        if (
+          !tabId ||
+              tabId ==
+                  getTabId(safari.application.activeBrowserWindow.activeTab)
+        ) safari.extension.toolbarItems[0].badge = details.text;
+
+        details.handled ||
+            safari.application.addEventListener('activate', function() {
+              details.handled = true;
+              chrome.browserAction.setBadgeText(details);
+            }, true);
       },
 
       setIcon: function(details) {
@@ -381,14 +373,26 @@ if (SAFARI) {
       },
 
       setPopup: function(details) {
-        safari.extension.toolbarItems[0].popover =
-            safari.extension.createPopover(
-              'popup',
-              chrome.extension.getURL(details.popup),
-              details.width || 400,
-              details.height || 300
+        var buttonCount = safari.extension.toolbarItems.length;
+        popup ||
+            (popup =
+                safari.extension.createPopover(
+                  'popup',
+                  chrome.extension.getURL(details.popup),
+                  details.width || 400,
+                  details.height || 300
+                )
             );
-        safari.extension.toolbarItems[0].command = null;
+
+        for (var i = 0; i < buttonCount; i++) {
+          var button = safari.extension.toolbarItems[i];
+          button.popover = popup;
+          button.command = null;
+        }
+
+        safari.application.addEventListener('open', function() {
+          chrome.browserAction.setPopup(details);
+        }, true);
       }
     },
 
