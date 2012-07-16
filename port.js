@@ -394,9 +394,11 @@ if (SAFARI) {
           button.command = null;
         }
 
-        safari.application.addEventListener('open', function() {
-          chrome.browserAction.setPopup(details);
-        }, true);
+        details.handled ||
+            safari.application.addEventListener('open', function() {
+              details.handled = true;
+              chrome.browserAction.setPopup(details);
+            }, true);
       }
     },
 
