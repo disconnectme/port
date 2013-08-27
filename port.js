@@ -1,7 +1,8 @@
 // Chrome to Safari port
 // Author: Michael Gundlach (gundlach@gmail.com)
-//         "cookies", "tabs", "browserAction", and additional "extension" API
-//         support by Brian Kennish <byoogle@gmail.com>
+//         "cookies", "tabs", "browserAction", "webRequest", "webNavigation",
+//         and additional "extension" API support by
+//         Brian Kennish <byoogle@gmail.com>
 // License: GPLv3 as part of adblockforchrome.googlecode.com
 //          or MIT if GPLv3 conflicts with your code's license.
 //
@@ -24,6 +25,9 @@ SAFARI = (typeof safari !== "undefined");
 
 // Safari 5.0 (533.x.x) with no menu support
 LEGACY_SAFARI = SAFARI && (navigator.appVersion.match(/\sSafari\/(\d+)\./) || [null,0])[1] < 534;
+
+// "localStorage" gets cleared too often in Safari to rely on.
+options = SAFARI ? safari.extension.settings : localStorage;
 
 if (SAFARI) {
 
@@ -329,12 +333,42 @@ if (SAFARI) {
           tab.id = getTabId(tab);
           callback([tab]);
         } else {
-          // No-op.
+          var massagedTabs = [];
+          var windows = safari.application.browserWindows;
+          var windowCount = windows.length;
+
+          for (var i = 0; i < windowCount; i++) {
+            var tabs = windows[i].tabs;
+            var tabCount = tabs.length;
+
+            for (var j = 0; j < tabCount; j++) {
+              var tab = tabs[j];
+              tab.id = getTabId(tab);
+              massagedTabs.push(tab);
+            }
+          }
+
+          callback(massagedTabs);
         }
       },
 
-      reload: function() {
-        // No-op.
+      reload: function(tabId) {
+        var windows = safari.application.browserWindows;
+        var windowCount = windows.length;
+
+        windows: for (var i = 0; i < windowCount; i++) {
+          var tabs = windows[i].tabs;
+          var tabCount = tabs.length;
+
+          for (var j = 0; j < tabCount; j++) {
+            var tab = tabs[j];
+
+            if (getTabId(tab) == tabId) {
+              tab.url = tab.url;
+              break windows;
+            }
+          }
+        }
       }
     },
 
@@ -372,12 +406,21 @@ if (SAFARI) {
       },
 
       setIcon: function(details) {
-        safari.extension.toolbarItems[0].image =
-            chrome.extension.getURL(details.path);
+        var buttons = safari.extension.toolbarItems;
+        var buttonCount = buttons.length;
+        var url = chrome.extension.getURL(details.path);
+        for (var i = 0; i < buttonCount; i++) buttons[i].image = url;
+
+        details.handled ||
+            safari.application.addEventListener('open', function() {
+              details.handled = true;
+              chrome.browserAction.setIcon(details);
+            }, true);
       },
 
       setPopup: function(details) {
-        var buttonCount = safari.extension.toolbarItems.length;
+        var buttons = safari.extension.toolbarItems;
+        var buttonCount = buttons.length;
         popup ||
             (popup =
                 safari.extension.createPopover(
@@ -389,7 +432,7 @@ if (SAFARI) {
             );
 
         for (var i = 0; i < buttonCount; i++) {
-          var button = safari.extension.toolbarItems[i];
+          var button = buttons[i];
           button.popover = popup;
           button.command = null;
         }
@@ -399,6 +442,22 @@ if (SAFARI) {
               details.handled = true;
               chrome.browserAction.setPopup(details);
             }, true);
+      }
+    },
+
+    webRequest: {
+      onBeforeRequest: {
+        addListener: function() {
+          // No-op.
+        }
+      }
+    },
+
+    webNavigation: {
+      onCommitted: {
+        addListener: function() {
+          // No-op.
+        }
       }
     },
 
