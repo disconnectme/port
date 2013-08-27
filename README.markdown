@@ -14,7 +14,7 @@ Safari and the `chrome.*` APIs unchanged in Chrome.
 
 ## License
 
-Copyright 2010–2012 Michael Gundlach
+Copyright 2010–2012 Michael Gundlach  
 Copyright 2012, 2013 Disconnect, Inc.
 
 This program is free software: you can redistribute it and/or modify it under
