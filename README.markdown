@@ -1,16 +1,17 @@
 # port.js
 
 port.js is an expanded version of
-[Michael Gundlach’s Chrome-to-Safari porting library for extensions](https://adblockforchrome.googlecode.com/svn/trunk/port.js).
+[Michael Gundlach’s Chrome-(and-Opera!)–to–Safari porting library for extensions](https://adblockforchrome.googlecode.com/svn/trunk/port.js).
 
 ## Dev HOWTO
 
 Add as the first script to your Safari plist file (created by the Extension
-Builder) and your Chrome manifest file, background page, and options page.
+Builder) and your Chrome and Opera manifest files, background pages, and options
+pages.
 
 Then use `chrome.*` APIs as usual and check the global `SAFARI` boolean for
 doing browser-specific stuff. The `safari.*` APIs will still be available in
-Safari and the `chrome.*` APIs unchanged in Chrome.
+Safari and the `chrome.*` APIs unchanged in Chrome and Opera.
 
 ## License
 
