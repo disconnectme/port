@@ -1,7 +1,7 @@
 # port.js
 
 port.js is an expanded version of
-[Michael Gundlach’s Chrome-(and-Opera!)–to–Safari porting library for extensions](https://adblockforchrome.googlecode.com/svn/trunk/port.js).
+[Michael Gundlach’s Chrome-(and-Opera<em>!</em>)–to–Safari porting library for extensions](https://adblockforchrome.googlecode.com/svn/trunk/port.js).
 
 ## Dev HOWTO
 
